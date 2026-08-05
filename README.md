@@ -22,125 +22,218 @@ const satisfied = semver.satisfies('1.2.3', '>=1.0.0 <2.0.0')
 console.log(satisfied) // true
 ```
 
+<!-- bare-refgen:api start -->
+
 ## API
 
-#### `const satisfied = semver.satisfies(version, range)`
+### errors
 
-Test whether `version` satisfies `range`. Both `version` and `range` may be strings, in which case they will be parsed.
+#### `errors.INVALID_RANGE(msg: string, fn?: Function): SemVerError`
 
-#### `semver.constants`
+**Parameters**
 
-An object containing the comparison operator constants:
+| Parameter | Type       | Default | Description                                                                                               |
+| --------- | ---------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `msg`     | `string`   | —       | The error message.                                                                                        |
+| `fn?`     | `Function` | —       | Optional function to omit from the top of the generated stack trace, passed to `Error.captureStackTrace`. |
 
-```js
-constants = {
-  EQ: 1,
-  LT: 2,
-  LTE: 3,
-  GT: 4,
-  GTE: 5
-}
+**Returns** `SemVerError` — A `SemVerError` with `code` set to `'INVALID_RANGE'`, for the caller to throw.
+
+#### `errors.INVALID_VERSION(msg: string, fn?: Function): SemVerError`
+
+**Parameters**
+
+| Parameter | Type       | Default | Description                                                                                               |
+| --------- | ---------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `msg`     | `string`   | —       | The error message.                                                                                        |
+| `fn?`     | `Function` | —       | Optional function to omit from the top of the generated stack trace, passed to `Error.captureStackTrace`. |
+
+**Returns** `SemVerError` — A `SemVerError` with `code` set to `'INVALID_VERSION'`, for the caller to throw.
+
+### Version
+
+#### `Version`
+
+```ts
+new Version(major: number, minor: number, patch: number, opts?: { prerelease?: string[]; build?: string[] })
 ```
-
-#### `semver.errors`
-
-The `SemVerError` class. Thrown when parsing invalid versions or ranges.
-
-#### `const version = new semver.Version(major, minor, patch[, options])`
 
 Create a new version with the given `major`, `minor`, and `patch` components.
 
-Options include:
+**Parameters**
 
-```js
-options = {
-  prerelease: [],
-  build: []
-}
-```
+| Parameter | Type                                          | Default | Description                                                                    |
+| --------- | --------------------------------------------- | ------- | ------------------------------------------------------------------------------ |
+| `major`   | `number`                                      | —       | The major version number.                                                      |
+| `minor`   | `number`                                      | —       | The minor version number.                                                      |
+| `patch`   | `number`                                      | —       | The patch version number.                                                      |
+| `opts?`   | `{ prerelease?: string[]; build?: string[] }` | —       | Optional `prerelease` and `build` tag arrays; each defaults to an empty array. |
 
-#### `version.major`
-
-The major version number.
-
-#### `version.minor`
-
-The minor version number.
-
-#### `version.patch`
-
-The patch version number.
-
-#### `version.prerelease`
-
-An array of prerelease tags.
-
-#### `version.build`
+#### `build: string[]`
 
 An array of build metadata tags.
 
-#### `const result = version.compare(other)`
+#### `compare(version: Version): boolean`
 
 Compare `version` with `other`, returning `1` if `version` is greater, `-1` if less, or `0` if equal. Comparison follows the Semantic Versioning 2.0.0 specification, including prerelease precedence rules.
 
-#### `const string = version.toString()`
+**Parameters**
+
+| Parameter | Type      | Default | Description                     |
+| --------- | --------- | ------- | ------------------------------- |
+| `version` | `Version` | —       | The version to compare against. |
+
+#### `major: number`
+
+The major version number.
+
+#### `minor: number`
+
+The minor version number.
+
+#### `patch: number`
+
+The patch version number.
+
+#### `prerelease: string[]`
+
+An array of prerelease tags.
+
+#### `Version.toString(): string`
 
 Return the string representation of `version`.
 
-#### `const version = semver.Version.parse(input)`
+#### `Version.compare(a: Version, b: Version): number`
 
-Parse a semantic version string into a `Version` instance. Throws a `SemVerError` with code `INVALID_VERSION` if `input` is not a valid version string.
+**Parameters**
 
-#### `const result = semver.Version.compare(a, b)`
+| Parameter | Type      | Default | Description |
+| --------- | --------- | ------- | ----------- |
+| `a`       | `Version` | —       | —           |
+| `b`       | `Version` | —       | —           |
 
-Compare two `Version` instances, returning `1`, `-1`, or `0`.
+#### `Version.parse(input: string): Version`
 
-#### `const comparator = new semver.Comparator(operator, version)`
+Parse a semantic version string into a `Version` instance.
+
+**Parameters**
+
+| Parameter | Type     | Default | Description                  |
+| --------- | -------- | ------- | ---------------------------- |
+| `input`   | `string` | —       | The version string to parse. |
+
+**Throws**
+
+- `INVALID_VERSION` — `input` is not a valid version string.
+
+### Comparator
+
+#### `new Comparator(operator: number, version: Version)`
 
 Create a new comparator with the given `operator` constant and `version`.
 
-#### `comparator.operator`
+**Parameters**
+
+| Parameter  | Type      | Default | Description                                                              |
+| ---------- | --------- | ------- | ------------------------------------------------------------------------ |
+| `operator` | `number`  | —       | One of the `constants` operator values (`EQ`, `LT`, `LTE`, `GT`, `GTE`). |
+| `version`  | `Version` | —       | The version the comparator matches against.                              |
+
+#### `operator: number`
 
 The comparison operator constant.
 
-#### `comparator.version`
-
-The `Version` instance to compare against.
-
-#### `const satisfied = comparator.test(version)`
+#### `Comparator.test(version: Version): boolean`
 
 Test whether `version` satisfies the comparator.
 
-#### `const string = comparator.toString()`
+**Parameters**
 
-Return the string representation of the comparator, e.g. `>=1.0.0`.
+| Parameter | Type      | Default | Description                                 |
+| --------- | --------- | ------- | ------------------------------------------- |
+| `version` | `Version` | —       | The version to test against the comparator. |
 
-#### `const range = new semver.Range([comparators])`
+**Returns** `boolean` — `true` if `version` satisfies the comparator's operator and version, `false` otherwise.
+
+#### `Comparator.toString(): string`
+
+Return the string representation of the comparator (operator and version), e.g. `>=1.2.3`.
+
+#### `version: Version`
+
+The `Version` instance to compare against.
+
+### Range
+
+#### `new Range(comparators?: Comparator[][])`
 
 Create a new range from a two-dimensional array of `Comparator` instances. Each inner array represents a set of comparators joined by intersection, and the outer array represents the union of those sets.
 
-#### `range.comparators`
+**Parameters**
+
+| Parameter      | Type             | Default | Description                                                                                                                                                             |
+| -------------- | ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `comparators?` | `Comparator[][]` | —       | Two-dimensional array of comparator sets: the outer array is a union (OR) of inner arrays, each an intersection (AND); defaults to an empty range that matches nothing. |
+
+#### `comparators: Comparator[][]`
 
 The two-dimensional array of `Comparator` instances.
 
-#### `const satisfied = range.test(version)`
+#### `Range.parse(input: string): Range`
+
+Parse a range string into a `Range` instance. Supports comparison operators (`<`, `<=`, `>`, `>=`, `=`), partial versions, and logical OR (`||`).
+
+**Parameters**
+
+| Parameter | Type     | Default | Description                |
+| --------- | -------- | ------- | -------------------------- |
+| `input`   | `string` | —       | The range string to parse. |
+
+**Throws**
+
+- `INVALID_VERSION` — `input` is not valid range syntax (reported via the `INVALID_VERSION` code — `INVALID_RANGE` is not currently thrown by the parser).
+
+#### `Range.test(version: Version): boolean`
 
 Test whether `version` satisfies the range.
 
-#### `const string = range.toString()`
+**Parameters**
 
-Return the string representation of the range.
+| Parameter | Type      | Default | Description                            |
+| --------- | --------- | ------- | -------------------------------------- |
+| `version` | `Version` | —       | The version to test against the range. |
 
-#### `const range = semver.Range.parse(input)`
+**Returns** `boolean` — `true` if `version` satisfies any comparator set in the range, `false` otherwise.
 
-Parse a range string into a `Range` instance. Supports the following syntax, which is desugared into sets of comparators following the [npm advanced range syntax](https://www.npmjs.com/package/semver#advanced-range-syntax):
+#### `Range.toString(): string`
 
-- Comparison operators: `<`, `<=`, `>`, `>=`, `=`, e.g. `>=1.2.3`.
-- Logical OR of comparator sets: `||`, e.g. `1.2.3 || >=2.0.0`.
-- Caret ranges: `^1.2.3` allows changes that do not modify the left-most non-zero component, e.g. `^1.2.3` is `>=1.2.3 <2.0.0-0` and `^0.2.3` is `>=0.2.3 <0.3.0-0`.
-- Tilde ranges: `~1.2.3` allows patch-level changes if a minor version is specified and minor-level changes if not, e.g. `~1.2.3` is `>=1.2.3 <1.3.0-0` and `~1` is `>=1.0.0 <2.0.0-0`. `~>` is accepted as an alias for `~`.
-- X-ranges: `x`, `X`, or `*` stand in for a component, e.g. `1.2.x` is `>=1.2.0 <1.3.0-0` and `*` is `>=0.0.0`. Partial versions such as `1` and `1.2` are treated as X-ranges.
-- Hyphen ranges: `1.2.3 - 2.3.4` specifies an inclusive set, expanding to `>=1.2.3 <=2.3.4`. A partial upper bound caps the range, e.g. `1.2.3 - 2.3` is `>=1.2.3 <2.4.0-0`.
+Return the string representation of the range, e.g. `>=1.2.3 <2.0.0`.
+
+### Functions
+
+#### `satisfies(version: Version, range: Range): boolean`
+
+Test whether `version` satisfies `range`. Both `version` and `range` may be strings, in which case they will be parsed.
+
+**Parameters**
+
+| Parameter | Type      | Default | Description                                            |
+| --------- | --------- | ------- | ------------------------------------------------------ |
+| `version` | `Version` | —       | The version to test, or a version string to parse.     |
+| `range`   | `Range`   | —       | The range to test against, or a range string to parse. |
+
+**Returns** `boolean` — `true` if `version` matches `range`, `false` otherwise.
+
+**Throws**
+
+- `INVALID_VERSION` — `version` or `range` is a string that fails to parse.
+
+### Constants and variables
+
+#### `constants: { EQ: 1; LT: 2; LTE: 3; GT: 4; GTE: 5 }`
+
+An object containing the comparison operator constants.
+<!-- bare-refgen:api end -->
 
 ## License
 

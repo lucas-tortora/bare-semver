@@ -24,7 +24,7 @@ console.log(satisfied) // true
 
 ## API
 
-See the [full API reference](https://docs.pears.com/reference/bare/modules/bare-semver).
+See the [`bare-semver` reference](https://docs.pears.com/reference/bare/modules/bare-semver).
 
 ## License
 
